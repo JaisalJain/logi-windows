@@ -1,0 +1,31 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34408.163
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevPilotTempPlugin", "src\DevPilotTempPlugin.csproj", "{D9B9606F-5CC3-4CD2-8C13-C60EA3171081}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BD08438B-1C4A-4FFA-A856-D5285D570BB8}"
+	ProjectSection(SolutionItems) = preProject
+		.vscode\launch.json = .vscode\launch.json
+		.vscode\tasks.json = .vscode\tasks.json
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D9B9606F-5CC3-4CD2-8C13-C60EA3171081}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D9B9606F-5CC3-4CD2-8C13-C60EA3171081}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D9B9606F-5CC3-4CD2-8C13-C60EA3171081}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D9B9606F-5CC3-4CD2-8C13-C60EA3171081}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EEE1C6A8-2296-4BE6-8C55-D623D91A6AE1}
+	EndGlobalSection
+EndGlobal

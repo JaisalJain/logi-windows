@@ -243,6 +243,84 @@ ipcMain.on("close-popup", () => {
   if (win && !win.isDestroyed()) win.close();
 });
 
+// ─── Local HTTP server for Logitech Actions SDK ───────────────────────────────
+// The C# plugin calls these endpoints when a Logitech button is pressed
+const http = require("http");
+
+const triggerServer = http.createServer(async (req, res) => {
+  const action = req.url.replace("/", "").toLowerCase(); // "improve", "debug", "explain"
+
+  res.writeHead(200, { "Content-Type": "text/plain" });
+  res.end("ok");
+
+  if (!["improve", "debug", "explain"].includes(action)) return;
+
+  console.log(`Logitech trigger received: ${action}`);
+
+  // Same flow as Ctrl+Alt+Space but fires the action directly
+  savedHwnd = getForegroundHwnd();
+  if (savedHwnd) {
+    copySelectionFromWindow(savedHwnd);
+  }
+  await new Promise((r) => setTimeout(r, 200));
+
+  // Open popup or reuse existing
+  if (!win || win.isDestroyed()) {
+    await openPopup();
+    // Give popup time to load before firing action
+    setTimeout(() => {
+      if (win && !win.isDestroyed()) {
+        win.webContents.send("loading", action);
+        // Send action after popup is ready
+        win.webContents.once("did-finish-load", () => {
+          win.webContents.send("loading", action);
+        });
+      }
+    }, 400);
+  }
+
+  // Fire the action
+  setTimeout(async () => {
+    if (!win || win.isDestroyed()) return;
+    try {
+      const text = await clipboardy.read();
+      if (!text || !text.trim()) return;
+
+      if (action === "improve") {
+        const result = await callBackend("improve", text);
+        if (win && !win.isDestroyed()) {
+          win.webContents.send("show-preview", { result, hwnd: savedHwnd });
+          win.setSize(680, 460);
+          const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+          win.setPosition(
+            Math.floor(width / 2 - 340),
+            Math.floor(height / 2 - 230),
+          );
+          win.setAlwaysOnTop(true);
+          win.removeAllListeners("blur");
+        }
+      } else {
+        const result = await callBackend(action, text);
+        if (win && !win.isDestroyed()) {
+          win.webContents.send("show-result", { result, actionName: action });
+          win.setSize(560, 400);
+          const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+          win.setPosition(
+            Math.floor(width / 2 - 280),
+            Math.floor(height / 2 - 200),
+          );
+          win.removeAllListeners("blur");
+        }
+      }
+    } catch (e) {
+      console.log("Logitech trigger error:", e);
+    }
+  }, 500);
+});
+
+triggerServer.listen(7734, "127.0.0.1", () => {
+  console.log("Logitech trigger server listening on port 7734");
+});
 // ─── App lifecycle ────────────────────────────────────────────────────────────
 
 app.whenReady().then(() => {
