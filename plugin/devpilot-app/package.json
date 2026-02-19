@@ -1,0 +1,16 @@
+{
+  "name": "devpilot",
+  "version": "1.0.0",
+  "description": "AI-first productivity accelerator for developers",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "clipboardy": "^2.3.0",
+    "node-fetch": "^2.7.0"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0"
+  }
+}

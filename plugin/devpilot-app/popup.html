@@ -1,0 +1,509 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=DM+Sans:wght@400;500;600&display=swap");
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: transparent;
+        -webkit-app-region: drag;
+      }
+
+      .shell {
+        background: #0d0d0f;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 14px;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow:
+          0 0 0 1px rgba(0, 0, 0, 0.5),
+          0 24px 64px rgba(0, 0, 0, 0.7),
+          0 4px 16px rgba(0, 0, 0, 0.5);
+      }
+
+      /* ── Menu state ── */
+      #menu-view {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        padding: 12px;
+        gap: 6px;
+        -webkit-app-region: no-drag;
+      }
+
+      .hint {
+        font-family: "DM Sans", sans-serif;
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.3);
+        text-align: center;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 4px 0 6px;
+      }
+
+      .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 14px;
+        border: none;
+        border-radius: 9px;
+        background: rgba(255, 255, 255, 0.04);
+        color: #e8e8e8;
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition:
+          background 0.12s,
+          transform 0.08s;
+        text-align: left;
+        -webkit-app-region: no-drag;
+      }
+
+      .action-btn:hover {
+        background: rgba(255, 255, 255, 0.09);
+      }
+
+      .action-btn:active {
+        transform: scale(0.98);
+      }
+
+      .action-btn .icon {
+        font-size: 15px;
+        width: 20px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+
+      .action-btn .label {
+        flex: 1;
+      }
+
+      .action-btn .shortcut {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.25);
+        font-family: "JetBrains Mono", monospace;
+      }
+
+      .btn-improve:hover {
+        background: rgba(59, 130, 246, 0.15);
+        border-color: rgba(59, 130, 246, 0.3);
+      }
+      .btn-debug:hover {
+        background: rgba(239, 68, 68, 0.12);
+      }
+      .btn-explain:hover {
+        background: rgba(34, 197, 94, 0.1);
+      }
+
+      /* ── Loading state ── */
+      #loading-view {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        gap: 12px;
+        -webkit-app-region: no-drag;
+      }
+
+      .spinner {
+        width: 28px;
+        height: 28px;
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-top-color: #3b82f6;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loading-text {
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.4);
+      }
+
+      /* ── Preview state (Improve) ── */
+      #preview-view {
+        display: none;
+        flex-direction: column;
+        height: 100%;
+        -webkit-app-region: no-drag;
+      }
+
+      .preview-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .preview-title {
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.7);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .badge {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 10px;
+        background: rgba(59, 130, 246, 0.2);
+        color: #60a5fa;
+        padding: 2px 8px;
+        border-radius: 20px;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+      }
+
+      .code-area {
+        flex: 1;
+        overflow: auto;
+        padding: 12px 16px;
+      }
+
+      .code-area pre {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 11.5px;
+        color: #d4d4d8;
+        white-space: pre-wrap;
+        word-break: break-all;
+        line-height: 1.65;
+      }
+
+      .preview-actions {
+        display: flex;
+        gap: 8px;
+        padding: 10px 14px 12px;
+        border-top: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .btn-apply {
+        flex: 1;
+        padding: 9px;
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          background 0.12s,
+          opacity 0.12s;
+      }
+
+      .btn-apply:hover {
+        background: #2563eb;
+      }
+
+      .btn-cancel {
+        padding: 9px 16px;
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.5);
+        border: none;
+        border-radius: 8px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        cursor: pointer;
+        transition: background 0.12s;
+      }
+
+      .btn-cancel:hover {
+        background: rgba(255, 255, 255, 0.09);
+      }
+
+      /* ── Result state (Debug/Explain) ── */
+      #result-view {
+        display: none;
+        flex-direction: column;
+        height: 100%;
+        -webkit-app-region: no-drag;
+      }
+
+      .result-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 16px 10px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .result-title {
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.7);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+
+      .close-btn {
+        background: none;
+        border: none;
+        color: rgba(255, 255, 255, 0.3);
+        font-size: 16px;
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+        transition:
+          color 0.1s,
+          background 0.1s;
+        line-height: 1;
+      }
+
+      .close-btn:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .result-body {
+        flex: 1;
+        overflow: auto;
+        padding: 14px 16px;
+      }
+
+      .result-body .result-text {
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        color: #d4d4d8;
+        line-height: 1.7;
+        white-space: pre-wrap;
+      }
+
+      /* ── Error state ── */
+      #error-view {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        gap: 10px;
+        padding: 20px;
+        -webkit-app-region: no-drag;
+      }
+
+      .error-icon {
+        font-size: 24px;
+      }
+
+      .error-text {
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        color: rgba(255, 100, 100, 0.8);
+        text-align: center;
+        line-height: 1.5;
+      }
+
+      /* Scrollbar */
+      ::-webkit-scrollbar {
+        width: 4px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <!-- MENU -->
+      <div id="menu-view">
+        <div class="hint"></div>
+        <button class="action-btn btn-improve" onclick="send('improve')">
+          <span class="icon">⚡</span>
+          <span class="label">Improve Code</span>
+          <span class="shortcut">1</span>
+        </button>
+        <button class="action-btn btn-debug" onclick="send('debug')">
+          <span class="icon">🔍</span>
+          <span class="label">Debug Error</span>
+          <span class="shortcut">2</span>
+        </button>
+        <button class="action-btn btn-explain" onclick="send('explain')">
+          <span class="icon">💬</span>
+          <span class="label">Explain Code</span>
+          <span class="shortcut">3</span>
+        </button>
+      </div>
+
+      <!-- LOADING -->
+      <div id="loading-view">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loading-label">Processing...</div>
+      </div>
+
+      <!-- PREVIEW (Improve) -->
+      <div id="preview-view">
+        <div class="preview-header">
+          <span class="preview-title">Improved Preview</span>
+          <span class="badge">Review changes</span>
+        </div>
+        <div class="code-area">
+          <pre id="preview-code"></pre>
+        </div>
+        <div class="preview-actions">
+          <button class="btn-apply" onclick="applyChanges()">
+            Apply Changes
+          </button>
+          <button class="btn-cancel" onclick="cancelPreview()">Cancel</button>
+        </div>
+      </div>
+
+      <!-- RESULT (Debug / Explain) -->
+      <div id="result-view">
+        <div class="result-header">
+          <span class="result-title" id="result-title">Result</span>
+          <button class="close-btn" onclick="closePopup()">✕</button>
+        </div>
+        <div class="result-body">
+          <div class="result-text" id="result-text"></div>
+        </div>
+      </div>
+
+      <!-- ERROR -->
+      <div id="error-view">
+        <div class="error-icon">⚠️</div>
+        <div class="error-text" id="error-text"></div>
+      </div>
+    </div>
+
+    <script>
+      const { ipcRenderer } = require("electron");
+
+      let pendingCode = null;
+      let pendingHwnd = null;
+
+      // keyboard shortcuts
+      document.addEventListener("keydown", (e) => {
+        const view = getVisibleView();
+        if (view === "menu") {
+          if (e.key === "1") send("improve");
+          if (e.key === "2") send("debug");
+          if (e.key === "3") send("explain");
+          if (e.key === "Escape") ipcRenderer.send("close-popup");
+        }
+        if (view === "preview" || view === "result") {
+          if (e.key === "Escape") cancelPreview();
+          if (e.key === "Enter" && view === "preview") applyChanges();
+        }
+      });
+
+      function getVisibleView() {
+        if (document.getElementById("menu-view").style.display !== "none")
+          return "menu";
+        if (document.getElementById("preview-view").style.display !== "none")
+          return "preview";
+        if (document.getElementById("result-view").style.display !== "none")
+          return "result";
+        return "other";
+      }
+
+      function send(action) {
+        ipcRenderer.send("action", action);
+      }
+
+      function applyChanges() {
+        ipcRenderer.send("apply-changes", {
+          newCode: pendingCode,
+          hwnd: pendingHwnd,
+        });
+      }
+
+      function cancelPreview() {
+        ipcRenderer.send("close-popup");
+      }
+
+      function closePopup() {
+        ipcRenderer.send("close-popup");
+      }
+
+      // ── Event handlers from main ──
+
+      ipcRenderer.on("loading", (event, actionName) => {
+        const labels = {
+          improve: "Improving your code...",
+          debug: "Analyzing the error...",
+          explain: "Explaining the code...",
+        };
+        switchView("loading");
+        document.getElementById("loading-label").textContent =
+          labels[actionName] || "Processing...";
+      });
+
+      ipcRenderer.on("show-preview", (event, { result, hwnd }) => {
+        pendingCode = result;
+        pendingHwnd = hwnd;
+        document.getElementById("preview-code").textContent = result;
+        switchView("preview");
+      });
+
+      ipcRenderer.on("show-result", (event, { result, actionName }) => {
+        const titles = { debug: "Debug Analysis", explain: "Code Explanation" };
+        document.getElementById("result-title").textContent =
+          titles[actionName] || "Result";
+        document.getElementById("result-text").textContent = result;
+        switchView("result");
+      });
+
+      ipcRenderer.on("error", (event, message) => {
+        document.getElementById("error-text").textContent = message;
+        switchView("error");
+        setTimeout(() => {
+          ipcRenderer.send("close-popup");
+        }, 3000);
+      });
+
+      function switchView(name) {
+        const views = [
+          "menu-view",
+          "loading-view",
+          "preview-view",
+          "result-view",
+          "error-view",
+        ];
+        const map = {
+          menu: "menu-view",
+          loading: "loading-view",
+          preview: "preview-view",
+          result: "result-view",
+          error: "error-view",
+        };
+        views.forEach((v) => {
+          document.getElementById(v).style.display = "none";
+        });
+        const target = document.getElementById(map[name]);
+        if (target) target.style.display = "flex";
+      }
+    </script>
+  </body>
+</html>
