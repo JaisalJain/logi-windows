@@ -111,7 +111,7 @@ Logitech trigger server listening on port 7734
 Open a new terminal:
 
 ```bash
-cd DevPilotFresh
+cd loupedeck-plugin
 dotnet build
 ```
 
@@ -158,7 +158,7 @@ devpilot/
 │   ├── main.js               # Global shortcut, PowerShell window management
 │   ├── popup.html            # Floating UI
 │   └── package.json
-└── DevPilotFresh/            # Logitech Actions SDK plugin (C#)
+└── loupedeck-plugin/            # Logitech Actions SDK plugin (C#)
     └── src/
         ├── Actions/
         │   └── DevPilotCommands.cs   # Improve/Debug/Explain commands
