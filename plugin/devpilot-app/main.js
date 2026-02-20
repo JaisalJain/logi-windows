@@ -248,10 +248,17 @@ ipcMain.on("close-popup", () => {
 const http = require("http");
 
 const triggerServer = http.createServer(async (req, res) => {
-  const action = req.url.replace("/", "").toLowerCase(); // "improve", "debug", "explain"
+  const action = req.url.replace("/", "").toLowerCase(); // "improve", "debug", "explain", "menu"
 
   res.writeHead(200, { "Content-Type": "text/plain" });
   res.end("ok");
+
+  // NEW: Trigger just the menu popup!
+  if (action === "menu") {
+    console.log("Logitech trigger received: menu");
+    openPopup();
+    return;
+  }
 
   if (!["improve", "debug", "explain"].includes(action)) return;
 

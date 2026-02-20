@@ -3,6 +3,22 @@ namespace Loupedeck.ExamplePlugin
     using System;
     using System.Diagnostics;
 
+    public class OpenMenuCommand : PluginDynamicCommand
+    {
+        public OpenMenuCommand()
+            : base("Open Menu", "Select text, then press to open the DevPilot menu", "DevPilot")
+        { }
+        protected override void RunCommand(String actionParameter)
+        {
+            Process.Start(new ProcessStartInfo {
+                FileName = "curl",
+                Arguments = "-s http://localhost:7734/menu",
+                CreateNoWindow = true,
+                UseShellExecute = false
+            });
+        }
+    }
+
     public class ImproveCodeCommand : PluginDynamicCommand
     {
         public ImproveCodeCommand()
