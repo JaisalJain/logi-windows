@@ -168,15 +168,6 @@ devpilot/
 
 ---
 
-## Installing the Plugin (for end users)
-
-1. Download `DevPilot.loupedeck` from the Releases page
-2. Open Loupedeck → Add-on Manager → **Install plugin from file**
-3. Select `DevPilot.loupedeck`
-4. Restart Loupedeck
-
----
-
 ## Tech Stack
 
 - **Logitech Actions SDK** (C# / .NET 8) — button trigger integration

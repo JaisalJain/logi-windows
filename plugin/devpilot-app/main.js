@@ -243,22 +243,15 @@ ipcMain.on("close-popup", () => {
   if (win && !win.isDestroyed()) win.close();
 });
 
-// ─── Local HTTP server for Logitech Actions SDK ───────────────────────────────
+/// ─── Local HTTP server for Logitech Actions SDK ───────────────────────────────
 // The C# plugin calls these endpoints when a Logitech button is pressed
 const http = require("http");
 
 const triggerServer = http.createServer(async (req, res) => {
-  const action = req.url.replace("/", "").toLowerCase(); // "improve", "debug", "explain", "menu"
+  const action = req.url.replace("/", "").toLowerCase(); // "improve", "debug", "explain"
 
   res.writeHead(200, { "Content-Type": "text/plain" });
   res.end("ok");
-
-  // NEW: Trigger just the menu popup!
-  if (action === "menu") {
-    console.log("Logitech trigger received: menu");
-    openPopup();
-    return;
-  }
 
   if (!["improve", "debug", "explain"].includes(action)) return;
 
